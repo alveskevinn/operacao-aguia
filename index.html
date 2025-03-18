@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard de Ordens de Separação</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Roboto", sans-serif;
+        background-color: #f4f4f9;
+        margin: 0;
+        padding: 20px;
+        color: #333;
+      }
+      h1 {
+        text-align: center;
+        color: #2c3e50;
+      }
+      .filters {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin: 20px 0;
+        flex-wrap: wrap;
+      }
+      .filters input,
+      .filters select {
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 14px;
+      }
+      table {
+        width: 100%;
+        max-width: 1000px;
+        margin: 20px auto;
+        border-collapse: collapse;
+        background: white;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      th,
+      td {
+        padding: 12px 15px;
+        text-align: left;
+      }
+      th {
+        background-color: #2c3e50;
+        color: white;
+        font-weight: 500;
+      }
+      tr:nth-child(even) {
+        background-color: #f8f9fa;
+      }
+      tr:hover {
+        background-color: #e9ecef;
+      }
+      .status-coletado {
+        color: #28a745;
+        font-weight: 500;
+      }
+      .status-pendente {
+        color: #dc3545;
+        font-weight: 500;
+      }
+      .status-aguardando {
+        color: #ffc107;
+        font-weight: 500;
+      }
+      .status-cancelado {
+        color: #6c757d;
+        font-weight: 500;
+      }
+      .chart-container {
+        width: 80%;
+        max-width: 600px;
+        margin: 40px auto;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Dashboard de Ordens de Separação</h1>
+
+    <!-- Filtros -->
+    <div class="filters">
+      <input
+        type="text"
+        id="filterCliente"
+        placeholder="Filtrar por Cliente"
+      />
+      <input
+        type="text"
+        id="filterTransportadora"
+        placeholder="Filtrar por Transportadora"
+      />
+      <select id="filterStatus">
+        <option value="">Todos os Status</option>
+        <option value="COLETADO">Coletado</option>
+        <option value="PENDENTE">Pendente</option>
+        <option value="AG COLETA">Aguardando Coleta</option>
+        <option value="CANCELADO">Cancelado</option>
+      </select>
+      <input type="date" id="filterData" />
+      <button id="applyFiltersButton" onclick="applyFilters()">
+        Aplicar Filtros
+      </button>
+    </div>
+
+    <!-- Gráfico -->
+    <div class="chart-container">
+      <canvas id="statusChart"></canvas>
+    </div>
+
+    <!-- Tabela -->
+    <table>
+      <thead>
+        <tr>
+          <th>Ordem de Separação</th>
+          <th>Cliente</th>
+          <th>Transportadora</th>
+          <th>Previsão de Coleta</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="table-body">
+        <!-- Dados serão inseridos aqui via JavaScript -->
+      </tbody>
+    </table>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+      let data = [];
+      let filteredData = []; 
+
+      function renderTable(data) {
+        const tableBody = document.getElementById("table-body");
+        tableBody.innerHTML = ""; 
+
+        data.forEach((item) => {
+          const row = document.createElement("tr");
+
+          const ordemSeparacao = document.createElement("td");
+          ordemSeparacao.textContent = item.ORDEM_DE_SEPARACAO;
+          row.appendChild(ordemSeparacao);
+
+          const cliente = document.createElement("td");
+          cliente.textContent = item.CLIENTE;
+          row.appendChild(cliente);
+
+          const transportadora = document.createElement("td");
+          transportadora.textContent = item.TRANSPORTADORA;
+          row.appendChild(transportadora);
+
+          const previsaoColeta = document.createElement("td");
+          previsaoColeta.textContent = item.PREVISAO_COLETA;
+          row.appendChild(previsaoColeta);
+
+          const status = document.createElement("td");
+          status.textContent = item.STATUS;
+          if (item.STATUS === "COLETADO") {
+            status.classList.add("status-coletado");
+          } else if (item.STATUS === "PENDENTE") {
+            status.classList.add("status-pendente");
+          } else if (item.STATUS === "AG COLETA") {
+            status.classList.add("status-aguardando");
+          } else if (item.STATUS === "CANCELADO") {
+            status.classList.add("status-cancelado");
+          }
+          row.appendChild(status);
+
+          tableBody.appendChild(row);
+        });
+      }
+
+      function updateChart(data) {
+        const statusCounts = {
+          COLETADO: 0,
+          PENDENTE: 0,
+          "AG COLETA": 0,
+          CANCELADO: 0,
+        };
+
+        data.forEach((item) => {
+          statusCounts[item.STATUS]++;
+        });
+
+        const ctx = document.getElementById("statusChart").getContext("2d");
+        if (
+          window.statusChart &&
+          typeof window.statusChart.destroy === "function"
+        ) {
+          window.statusChart.destroy();
+        }
+        window.statusChart = new Chart(ctx, {
+          type: "bar",
+          data: {
+            labels: ["Coletado", "Pendente", "Aguardando Coleta", "Cancelado"],
+            datasets: [
+              {
+                label: "Quantidade de Ordens",
+                data: [
+                  statusCounts.COLETADO,
+                  statusCounts.PENDENTE,
+                  statusCounts["AG COLETA"],
+                  statusCounts.CANCELADO,
+                ],
+                backgroundColor: [
+                  "rgba(40, 167, 69, 0.2)",
+                  "rgba(220, 53, 69, 0.2)",
+                  "rgba(255, 206, 86, 0.2)",
+                  "rgba(108, 117, 125, 0.2)",
+                ],
+                borderColor: [
+                  "rgba(40, 167, 69, 1)",
+                  "rgba(220, 53, 69, 1)",
+                  "rgba(255, 206, 86, 1)",
+                  "rgba(108, 117, 125, 1)",
+                ],
+                borderWidth: 1,
+              },
+            ],
+          },
+          options: {
+            scales: {
+              y: {
+                beginAtZero: true,
+              },
+            },
+          },
+        });
+      }
+
+      function applyFilters() {
+    const filterCliente = document
+        .getElementById("filterCliente")
+        .value.toUpperCase();
+    const filterTransportadora = document
+        .getElementById("filterTransportadora")
+        .value.toUpperCase();
+    const filterStatus = document.getElementById("filterStatus").value;
+    const filterData = document.getElementById("filterData").value;
+
+    filteredData = data.filter((item) => {
+        // Verificar se item.CLIENTE e item.TRANSPORTADORA existem antes de chamar toUpperCase()
+        const cliente = item.CLIENTE ? item.CLIENTE.toUpperCase() : "";
+        const transportadora = item.TRANSPORTADORA ? item.TRANSPORTADORA.toUpperCase() : "";
+
+        return (
+            (filterCliente ? cliente.includes(filterCliente) : true) &&
+            (filterTransportadora ? transportadora.includes(filterTransportadora) : true) &&
+            (filterStatus ? item.STATUS === filterStatus : true) &&
+            (filterData ? item.PREVISAO_COLETA === filterData : true)
+        );
+    });
+
+    renderTable(filteredData);
+    updateChart(filteredData);
+}
+
+      fetch("mock.json")
+        .then((response) => response.json())
+        .then((jsonData) => {
+          data = jsonData;
+          filteredData = [...data];
+          renderTable(data);
+          updateChart(data);
+
+          document
+            .getElementById("applyFiltersButton")
+            .addEventListener("click", applyFilters);
+        })
+        .catch((error) => console.error("Erro ao carregar os dados:", error));
+    </script>
+  </body>
+</html>
