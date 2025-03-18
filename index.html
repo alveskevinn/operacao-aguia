@@ -78,18 +78,19 @@
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         border-radius: 8px;
         overflow: hidden;
+        table-layout: fixed;
       }
 
       th,
       td {
-        padding: 12px 15px;
+        padding: 8px;
         text-align: left;
       }
 
       th {
         background-color: #2c3e50;
         color: white;
-        font-weight: 500;
+        font-weight: 300;
       }
 
       tr {
@@ -128,7 +129,7 @@
 
       .chart-container {
         width: 80%;
-        max-width: 800px;
+        max-width: 900px;
         margin: 120px auto;
       }
 
@@ -196,7 +197,7 @@
         <canvas id="statusChart"></canvas>
       </div>
 
-      <div style="margin: 0 auto">
+      <div style="margin: 0 auto; max-width: 800px;">
         <table>
           <thead>
             <tr>
@@ -265,7 +266,6 @@
         });
       }
 
-      // Função para atualizar a paginação
       function updatePagination(data) {
         const pagination = document.getElementById("pagination");
         pagination.innerHTML = "";
