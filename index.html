@@ -3,23 +3,55 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dashboard de Ordens de Separação</title>
+    <title>Ordens de Preparação</title>
     <link
       href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap"
       rel="stylesheet"
     />
     <style>
+      /* Estilos da Navbar */
+      .navbar {
+        background-color: #2c3e50;
+        padding: 10px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: white;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .navbar a {
+        color: white;
+        text-decoration: none;
+        margin: 0 15px;
+        font-size: 16px;
+        transition: color 0.3s ease;
+      }
+
+      .navbar a:hover {
+        color: #ffc107;
+      }
+
+      .navbar .logo {
+        font-size: 20px;
+        font-weight: 500;
+      }
+
+      /* Estilos existentes */
       body {
         font-family: "Roboto", sans-serif;
         background-color: #f4f4f9;
         margin: 0;
-        padding: 20px;
+        padding: 0;
         color: #333;
       }
+
       h1 {
         text-align: center;
         color: #2c3e50;
+        margin-top: 20px;
       }
+
       .filters {
         display: flex;
         justify-content: center;
@@ -27,6 +59,7 @@
         margin: 20px 0;
         flex-wrap: wrap;
       }
+
       .filters input,
       .filters select {
         padding: 8px;
@@ -34,6 +67,7 @@
         border-radius: 4px;
         font-size: 14px;
       }
+
       table {
         width: 100%;
         max-width: 1000px;
@@ -44,38 +78,47 @@
         border-radius: 8px;
         overflow: hidden;
       }
+
       th,
       td {
         padding: 12px 15px;
         text-align: left;
       }
+
       th {
         background-color: #2c3e50;
         color: white;
         font-weight: 500;
       }
+
       tr:nth-child(even) {
         background-color: #f8f9fa;
       }
+
       tr:hover {
         background-color: #e9ecef;
       }
+
       .status-coletado {
         color: #28a745;
         font-weight: 500;
       }
+
       .status-pendente {
         color: #dc3545;
         font-weight: 500;
       }
+
       .status-aguardando {
         color: #ffc107;
         font-weight: 500;
       }
+
       .status-cancelado {
         color: #6c757d;
         font-weight: 500;
       }
+
       .chart-container {
         width: 80%;
         max-width: 600px;
@@ -84,7 +127,18 @@
     </style>
   </head>
   <body>
-    <h1>Dashboard de Ordens de Separação</h1>
+    <!-- Navbar -->
+    <nav class="navbar">
+      <div class="logo">GP Log</div>
+      <div>
+        <a href="#">Início</a>
+        <a href="#">Ordens</a>
+        <a href="#">Relatórios</a>
+        <a href="#">Configurações</a>
+      </div>
+    </nav>
+
+    <h1>Ordens de Preparação</h1>
 
     <!-- Filtros -->
     <div class="filters">
@@ -135,11 +189,11 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
       let data = [];
-      let filteredData = []; 
+      let filteredData = [];
 
       function renderTable(data) {
         const tableBody = document.getElementById("table-body");
-        tableBody.innerHTML = ""; 
+        tableBody.innerHTML = "";
 
         data.forEach((item) => {
           const row = document.createElement("tr");
@@ -236,31 +290,34 @@
       }
 
       function applyFilters() {
-    const filterCliente = document
-        .getElementById("filterCliente")
-        .value.toUpperCase();
-    const filterTransportadora = document
-        .getElementById("filterTransportadora")
-        .value.toUpperCase();
-    const filterStatus = document.getElementById("filterStatus").value;
-    const filterData = document.getElementById("filterData").value;
+        const filterCliente = document
+          .getElementById("filterCliente")
+          .value.toUpperCase();
+        const filterTransportadora = document
+          .getElementById("filterTransportadora")
+          .value.toUpperCase();
+        const filterStatus = document.getElementById("filterStatus").value;
+        const filterData = document.getElementById("filterData").value;
 
-    filteredData = data.filter((item) => {
-        // Verificar se item.CLIENTE e item.TRANSPORTADORA existem antes de chamar toUpperCase()
-        const cliente = item.CLIENTE ? item.CLIENTE.toUpperCase() : "";
-        const transportadora = item.TRANSPORTADORA ? item.TRANSPORTADORA.toUpperCase() : "";
+        filteredData = data.filter((item) => {
+          const cliente = item.CLIENTE ? item.CLIENTE.toUpperCase() : "";
+          const transportadora = item.TRANSPORTADORA
+            ? item.TRANSPORTADORA.toUpperCase()
+            : "";
 
-        return (
+          return (
             (filterCliente ? cliente.includes(filterCliente) : true) &&
-            (filterTransportadora ? transportadora.includes(filterTransportadora) : true) &&
+            (filterTransportadora
+              ? transportadora.includes(filterTransportadora)
+              : true) &&
             (filterStatus ? item.STATUS === filterStatus : true) &&
             (filterData ? item.PREVISAO_COLETA === filterData : true)
-        );
-    });
+          );
+        });
 
-    renderTable(filteredData);
-    updateChart(filteredData);
-}
+        renderTable(filteredData);
+        updateChart(filteredData);
+      }
 
       fetch("mock.json")
         .then((response) => response.json())
