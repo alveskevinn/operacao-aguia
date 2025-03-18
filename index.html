@@ -72,7 +72,8 @@
         width: 100%;
         max-width: 1000px;
         margin: 20px auto;
-        border-collapse: collapse;
+        border-collapse: separate;
+        border-spacing: 0 10px;
         background: white;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         border-radius: 8px;
@@ -89,6 +90,12 @@
         background-color: #2c3e50;
         color: white;
         font-weight: 500;
+      }
+
+      tr {
+        transition: background-color 0.3s ease;
+        background-color: #ffffff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       }
 
       tr:nth-child(even) {
@@ -121,11 +128,10 @@
 
       .chart-container {
         width: 80%;
-        max-width: 600px;
-        margin: 40px auto;
+        max-width: 800px;
+        margin: 120px auto;
       }
 
-      /* Estilos da Paginação */
       .pagination {
         display: flex;
         justify-content: center;
@@ -139,7 +145,7 @@
         border-radius: 4px;
         background-color: white;
         cursor: pointer;
-        transition: background-color 0.3s ease;
+        transition: background-color 0.3s ease, color 0.3s ease;
       }
 
       .pagination button:hover {
@@ -154,7 +160,6 @@
     </style>
   </head>
   <body>
-    <!-- Navbar -->
     <nav class="navbar">
       <div class="logo">GP Log</div>
       <div>
@@ -167,13 +172,8 @@
 
     <h1>Ordens de Preparação</h1>
 
-    <!-- Filtros -->
     <div class="filters">
-      <input
-        type="text"
-        id="filterCliente"
-        placeholder="Filtrar por Cliente"
-      />
+      <input type="text" id="filterCliente" placeholder="Filtrar por Cliente" />
       <input
         type="text"
         id="filterTransportadora"
@@ -191,31 +191,27 @@
         Aplicar Filtros
       </button>
     </div>
+    <div style="display: flex">
+      <div class="chart-container">
+        <canvas id="statusChart"></canvas>
+      </div>
 
-    <!-- Gráfico -->
-    <div class="chart-container">
-      <canvas id="statusChart"></canvas>
-    </div>
+      <div style="margin: 0 auto">
+        <table>
+          <thead>
+            <tr>
+              <th>Ordem de Separação</th>
+              <th>Cliente</th>
+              <th>Transportadora</th>
+              <th>Previsão de Coleta</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="table-body"></tbody>
+        </table>
 
-    <!-- Tabela -->
-    <table>
-      <thead>
-        <tr>
-          <th>Ordem de Separação</th>
-          <th>Cliente</th>
-          <th>Transportadora</th>
-          <th>Previsão de Coleta</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody id="table-body">
-        <!-- Dados serão inseridos aqui via JavaScript -->
-      </tbody>
-    </table>
-
-    <!-- Paginação -->
-    <div class="pagination" id="pagination">
-      <!-- Botões de paginação serão inseridos aqui via JavaScript -->
+        <div class="pagination" id="pagination"></div>
+      </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -223,9 +219,8 @@
       let data = [];
       let filteredData = [];
       let currentPage = 1;
-      const rowsPerPage = 10; // Número de linhas por página
+      const rowsPerPage = 10; 
 
-      // Função para renderizar a tabela com base na página atual
       function renderTable(data, page) {
         const tableBody = document.getElementById("table-body");
         tableBody.innerHTML = "";
